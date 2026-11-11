@@ -356,7 +356,7 @@ footer { font-size: 12px; color: var(--muted); text-align: center; font-family: 
     <summary>修改日期和名字</summary>
     <form class="cfg" id="cfgForm">
       <label class="full">她的称呼<input id="f-name" type="text" maxlength="12"></label>
-      <label class="full">出发时间（北京时间）<input id="f-target" type="datetime-local"></label>
+      <label class="full">出发时间（佐治亚时间）<input id="f-target" type="datetime-local"></label>
       <label>出发城市<input id="f-from" type="text" maxlength="10"></label>
       <label>出发代码<input id="f-fromCode" type="text" maxlength="4"></label>
       <label>到达城市<input id="f-to" type="text" maxlength="10"></label>
@@ -369,12 +369,13 @@ footer { font-size: 12px; color: var(--muted); text-align: center; font-family: 
     </form>
   </details>
 
-  <footer id="nowLine">北京时间 --:--:--</footer>
+  <footer id="nowLine">佐治亚时间 --:--:--</footer>
 </div>
 
 <script>
 (function () {
-  var TZ = 'Asia/Shanghai';
+  var TZ = 'America/New_York';
+  var OFFSET = '-05:00';
   var START_DATE = '2026-11-10';
   var DEFAULTS = { name: '宝宝', target: '2026-12-03T00:00', from: '这里', fromCode: 'HERE', to: '家', toCode: 'HOME' };
   var LIST_DEFAULT = ['睡到自然醒', '见见好久没见的朋友', '去吃想了很久的那家店', '出去旅游一趟', '多拍几张旅游的风景给我的宝', '吃遍想吃的小吃', '去一个从没去过的地方'];
@@ -429,7 +430,7 @@ footer { font-size: 12px; color: var(--muted); text-align: center; font-family: 
   var fmtDate = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
   var fmtTime = new Intl.DateTimeFormat('zh-CN', { timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   function bjDate(ms) { return fmtDate.format(new Date(ms)); }
-  function dayStart(str) { return Date.parse(str + 'T00:00:00+08:00'); }
+  function dayStart(str) { return Date.parse(str + 'T00:00:00' + OFFSET); }
   function dayIdx(str) { return Math.round((dayStart(str) - dayStart(START_DATE)) / DAY); }
   function cn(str) { var p = str.split('-'); return (+p[1]) + '月' + (+p[2]) + '日'; }
   function dot(str) { var p = str.split('-'); return (+p[1]) + '.' + p[2]; }
@@ -445,7 +446,7 @@ footer { font-size: 12px; color: var(--muted); text-align: center; font-family: 
   }
 
   function applyCfg() {
-    targetMs = Date.parse(cfg.target + ':00+08:00');
+    targetMs = Date.parse(cfg.target + ':00' + OFFSET);
     targetDate = cfg.target.slice(0, 10);
     totalDays = Math.max(1, dayIdx(targetDate));
     $('herName').textContent = cfg.name || DEFAULTS.name;
@@ -604,7 +605,7 @@ footer { font-size: 12px; color: var(--muted); text-align: center; font-family: 
     plane.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ') rotate(' + ang.toFixed(1) + ')');
     trail.style.strokeDasharray = L.toFixed(1) + ' ' + len;
 
-    $('nowLine').textContent = '北京时间 ' + fmtTime.format(new Date(now));
+    $('nowLine').textContent = '佐治亚时间 ' + fmtTime.format(new Date(now));
     if (diff === 0) $('subLine').textContent = '今天出发啦。一路平安，我在这边等你的消息。';
 
     var today = bjDate(now);
