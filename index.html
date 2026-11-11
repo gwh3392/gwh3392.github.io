@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBEEE8">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>回家倒计时</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Long+Cang&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" media="print" id="gf">
+<script>(function(l){function on(){l.media="all";}if(l.sheet)on();else l.addEventListener("load",on);})(document.getElementById("gf"));</script>
+<style>
+/* Layout: a warm letter for her trip home — a dusk-sky greeting, a soft boarding pass with the countdown, a sheet of daily stamps, a sealed note, a hug button and her own going-home list. */
+:root {
+  --paper: #FBEEE8;
+  --card: #FFFAF7;
+  --ink: #4A2E2A;
+  --muted: #92706A;
+  --line: #F0D6CC;
+  --rose: #DD5C7B;
+  --honey: #E29A32;
+  --rose-soft: #FBDDE4;
+  --honey-soft: #FCEBCD;
+  --sky-a: #FDE3D6;
+  --sky-b: #F9D3DE;
+  --shadow: 0 1px 0 rgba(120,60,50,.04), 0 14px 34px -16px rgba(150,70,60,.35);
+  --f-display: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --f-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --f-hand: "Long Cang", "Kaiti SC", "STKaiti", "KaiTi", cursive;
+  --f-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1F1618; --card: #2B1F22; --ink: #F7E7E0; --muted: #BC9A92; --line: #45322F;
+    --rose: #F48DA4; --honey: #F2B85E; --rose-soft: #47262E; --honey-soft: #40311F;
+    --sky-a: #3A2328; --sky-b: #2A1D2A;
+    --shadow: 0 1px 0 rgba(0,0,0,.2), 0 16px 36px -16px rgba(0,0,0,.65);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1F1618; --card: #2B1F22; --ink: #F7E7E0; --muted: #BC9A92; --line: #45322F;
+  --rose: #F48DA4; --honey: #F2B85E; --rose-soft: #47262E; --honey-soft: #40311F;
+  --sky-a: #3A2328; --sky-b: #2A1D2A;
+  --shadow: 0 1px 0 rgba(0,0,0,.2), 0 16px 36px -16px rgba(0,0,0,.65);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+.wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; padding-top: 22px; }
+
+/* greeting */
+header.hello {
+  position: relative; overflow: hidden; border-radius: 26px;
+  background: linear-gradient(160deg, var(--sky-a), var(--sky-b));
+  padding: 30px 26px 28px; display: flex; flex-direction: column; gap: 4px;
+}
+header.hello::before { /* sun */
+  content: ""; position: absolute; right: 28px; top: 26px; width: 74px; height: 74px; border-radius: 50%;
+  background: radial-gradient(circle, var(--honey) 0 55%, transparent 56%);
+  box-shadow: 0 0 0 14px color-mix(in srgb, var(--honey) 18%, transparent), 0 0 0 30px color-mix(in srgb, var(--honey) 8%, transparent);
+  opacity: .9;
+}
+.cloud { position: absolute; background: var(--card); opacity: .75; border-radius: 999px; height: 18px; }
+.cloud::before, .cloud::after { content: ""; position: absolute; background: inherit; border-radius: 50%; }
+.cloud::before { width: 26px; height: 26px; left: 10px; top: -12px; }
+.cloud::after { width: 34px; height: 34px; left: 28px; top: -18px; }
+.cloud.c1 { width: 86px; right: 70px; top: 96px; }
+.cloud.c2 { width: 64px; right: 10px; top: 128px; opacity: .55; }
+.greet { font-family: var(--f-hand); font-size: clamp(30px, 7vw, 40px); color: var(--rose); line-height: 1.1; position: relative; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(36px, 9vw, 58px); line-height: 1.15; margin: 4px 0 0; position: relative; }
+h1 .num { color: var(--rose); font-family: var(--f-mono); font-weight: 500; letter-spacing: -.02em; padding: 0 .08em; }
+.sub { color: var(--muted); margin: 6px 0 0; position: relative; max-width: 34em; }
+
+/* boarding pass */
+.pass { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; position: relative; }
+.pass-top { padding: 22px 22px 18px; display: flex; flex-direction: column; gap: 14px; }
+.route-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.city { display: flex; flex-direction: column; min-width: 0; }
+.city.to { text-align: right; align-items: flex-end; }
+.code { font-family: var(--f-mono); font-weight: 500; font-size: clamp(26px, 7vw, 38px); letter-spacing: .04em; line-height: 1; }
+.city.to .code { color: var(--rose); }
+.cname { color: var(--muted); font-size: 13px; }
+.flightno { font-family: var(--f-mono); font-size: 12px; color: var(--honey); background: var(--honey-soft); padding: 3px 10px; border-radius: 999px; align-self: center; white-space: nowrap; }
+
+.arc { width: 100%; height: auto; display: block; overflow: visible; }
+.arc .base { fill: none; stroke: var(--line); stroke-width: 2.5; stroke-dasharray: 1 8; stroke-linecap: round; }
+.arc .trail { fill: none; stroke: var(--rose); stroke-width: 3; stroke-linecap: round; }
+.arc .dot { fill: var(--card); stroke: var(--muted); stroke-width: 2; }
+.arc .house path { fill: var(--rose); }
+.arc .house rect { fill: var(--card); }
+.arc .plane path { fill: var(--honey); }
+.arc text { fill: var(--muted); font-family: var(--f-mono); font-size: 13px; }
+
+.progress-line { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.progress-line b { color: var(--ink); font-family: var(--f-mono); font-weight: 500; }
+
+.tear { position: relative; height: 0; border-top: 2px dashed var(--line); margin: 0 20px; }
+.tear::before, .tear::after { content: ""; position: absolute; top: -13px; width: 24px; height: 24px; border-radius: 50%; background: var(--paper); }
+.tear::before { left: -33px; } .tear::after { right: -33px; }
+
+.pass-bottom { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 18px; }
+.label { font-size: 11px; letter-spacing: .14em; color: var(--muted); }
+
+.clock { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.unit { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.tiles { display: flex; gap: 4px; }
+.tile {
+  font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums;
+  font-size: clamp(26px, 7.4vw, 46px); line-height: 1;
+  width: 1.15em; padding: .24em 0; text-align: center;
+  background: var(--rose-soft); color: var(--ink); border-radius: 12px; position: relative;
+  perspective: 300px;
+}
+.unit:first-child .tile { background: var(--rose); color: var(--card); }
+.tile span { display: inline-block; transform-origin: 50% 50%; }
+.tile.flip span { animation: flip .4s cubic-bezier(.3,.7,.3,1); }
+@keyframes flip { 0% { transform: rotateX(90deg); opacity: .2; } 100% { transform: rotateX(0); opacity: 1; } }
+.unit-name { font-size: 12px; color: var(--muted); letter-spacing: .1em; }
+
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.fact { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fact .v { font-weight: 500; font-size: 14px; overflow-wrap: anywhere; }
+
+.arrived { display: none; text-align: center; padding: 6px 0; }
+.is-arrived .clock { display: none; }
+.is-arrived .arrived { display: block; }
+.arrived p { font-family: var(--f-display); font-weight: 700; font-size: clamp(30px, 8vw, 44px); margin: 0; color: var(--rose); }
+
+/* blocks */
+section.block { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
+.block-head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; }
+h2 { font-family: var(--f-display); font-weight: 600; font-size: 22px; margin: 0; }
+.hint { font-size: 13px; color: var(--muted); }
+
+/* stamps */
+.stamps { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
+.stamp {
+  appearance: none; font: inherit; color: inherit; cursor: pointer;
+  aspect-ratio: 4 / 5; max-width: 100%; border-radius: 8px; position: relative;
+  background: var(--paper); border: 2px dotted var(--line);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: transform .15s ease;
+}
+.stamp .d { font-family: var(--f-mono); font-size: 16px; font-weight: 500; line-height: 1.1; }
+.stamp .m { font-size: 10px; color: var(--muted); }
+.stamp.past { background: var(--honey-soft); border: 2px dashed var(--honey); }
+.stamp.past::after { content: ""; position: absolute; inset: 18% 12%; border: 1.5px solid var(--honey); border-radius: 50%; opacity: .55; transform: rotate(-14deg); }
+.stamp.today { background: var(--rose-soft); border: 2px dashed var(--rose); }
+.stamp.today .d { color: var(--rose); }
+.stamp.future { cursor: default; opacity: .55; }
+.stamp.home { background: var(--rose); border: 2px solid var(--rose); color: var(--card); opacity: 1; }
+.stamp.home .m { color: var(--card); opacity: .9; }
+.stamp.selected { outline: 2px solid var(--ink); outline-offset: 2px; }
+.stamp:not(.future):hover { transform: translateY(-2px) rotate(-2deg); }
+:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+
+/* note + hug */
+.two { display: grid; grid-template-columns: 1.4fr 1fr; gap: 22px; }
+.two > * { min-width: 0; }
+.note-body { position: relative; min-height: 172px; border-radius: 14px; background:
+  repeating-linear-gradient(to bottom, transparent 0 31px, var(--line) 31px 32px), var(--paper);
+  padding: 14px 18px 18px; display: flex; flex-direction: column; justify-content: center; }
+.note-meta { font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+.note-text { font-family: var(--f-hand); font-size: clamp(24px, 5.6vw, 30px); line-height: 32px; margin: 4px 0 0; color: var(--ink); }
+.note-body.sealed .note-text, .note-body.sealed .note-meta { visibility: hidden; }
+.seal {
+  position: absolute; inset: 0; border-radius: 14px; border: 0; cursor: pointer; font: inherit;
+  background: var(--card); color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+.seal .wax { width: 56px; height: 56px; border-radius: 50%; background: var(--rose); color: var(--card);
+  display: grid; place-items: center; box-shadow: 0 3px 0 rgba(0,0,0,.12); }
+.seal .wax svg { width: 24px; height: 24px; fill: currentColor; }
+.seal .t { font-size: 14px; color: var(--muted); }
+.note-body:not(.sealed) .seal { display: none; }
+.note-body.opening .note-text { animation: reveal .7s ease both; }
+@keyframes reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.hug { justify-content: space-between; }
+.hug p { margin: 0; color: var(--muted); font-size: 14px; }
+.hug-btn {
+  appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 500; font-size: 16px;
+  background: var(--rose); color: var(--card); border-radius: 999px; padding: 12px 24px; align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 8px; transition: transform .12s ease;
+}
+.hug-btn:active { transform: scale(.94); }
+.hug-btn svg { width: 18px; height: 18px; fill: currentColor; }
+.hug-count { font-family: var(--f-mono); font-size: 40px; line-height: 1; font-weight: 500; color: var(--rose); }
+.hug-count small { font-family: var(--f-body); font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+.heart { position: fixed; pointer-events: none; width: 20px; height: 20px; z-index: 20; color: var(--rose); animation: float 1.2s ease-out forwards; }
+.heart svg { width: 100%; height: 100%; fill: currentColor; }
+@keyframes float { 0% { transform: translate(0,0) scale(.6); opacity: 1; } 100% { transform: translate(var(--dx), -140px) scale(1.2) rotate(var(--rot)); opacity: 0; } }
+
+/* going-home list */
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.list li { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px dashed var(--line); }
+.list li:last-child { border-bottom: 0; }
+.list input[type="checkbox"] { appearance: none; width: 22px; height: 22px; flex: none; border-radius: 50%; border: 2px solid var(--line); background: var(--card); cursor: pointer; display: grid; place-items: center; margin: 0; }
+.list input[type="checkbox"]:checked { background: var(--rose); border-color: var(--rose); }
+.list input[type="checkbox"]:checked::after { content: ""; width: 6px; height: 11px; border: solid var(--card); border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+.list label { flex: 1; min-width: 0; cursor: pointer; overflow-wrap: anywhere; }
+.list li.done label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--rose); }
+.list .del { appearance: none; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 4px 6px; border-radius: 6px; }
+.list .del:hover { color: var(--rose); }
+.add { display: flex; gap: 8px; }
+.add input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; }
+.btn { appearance: none; font: inherit; font-size: 14px; cursor: pointer; border-radius: 999px; padding: 8px 18px; border: 1px solid var(--rose); background: var(--rose); color: var(--card); white-space: nowrap; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+
+/* settings */
+details.settings { border-top: 1px dashed var(--line); padding-top: 14px; }
+details.settings summary { cursor: pointer; color: var(--muted); font-size: 13px; list-style: none; display: inline-flex; gap: 6px; align-items: center; }
+details.settings summary::-webkit-details-marker { display: none; }
+details.settings summary::before { content: "+"; font-family: var(--f-mono); }
+details.settings[open] summary::before { content: "−"; }
+form.cfg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; margin-top: 14px; }
+form.cfg label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+form.cfg input { font: inherit; font-size: 15px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; width: 100%; min-width: 0; }
+form.cfg .full { grid-column: 1 / -1; }
+.row-btns { grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.saved { font-size: 13px; color: var(--rose); }
+
+footer { font-size: 12px; color: var(--muted); text-align: center; font-family: var(--f-mono); }
+
+@media (max-width: 600px) {
+  .two { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  header.hello { padding: 24px 18px 22px; }
+  header.hello::before { width: 54px; height: 54px; right: 18px; top: 18px; }
+  .cloud.c1 { right: 46px; top: 76px; }
+  .pass-top, .pass-bottom, section.block { padding-left: 16px; padding-right: 16px; }
+  .clock { gap: 6px; }
+  .tiles { gap: 3px; }
+  .tile { border-radius: 9px; }
+  form.cfg { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile.flip span, .note-body.opening .note-text, .heart { animation: none; }
+  .stamp, .hug-btn { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header class="hello">
+    <span class="cloud c1" aria-hidden="true"></span><span class="cloud c2" aria-hidden="true"></span>
+    <span class="greet"><span id="herName">宝宝</span>，</span>
+    <h1>还有<span class="num" id="daysBig">--</span>天<br>就能回国啦</h1>
+    <p class="sub" id="subLine">从 11 月 10 日开始数，每过一天，就离家近一点。我在这边陪你一起数。</p>
+  </header>
+
+  <article class="pass" id="pass" aria-label="回家的登机牌">
+    <div class="pass-top">
+      <div class="route-head">
+        <div class="city"><span class="label">出发</span><span class="code" id="fromCode">HERE</span><span class="cname" id="fromName">这里</span></div>
+        <span class="flightno" id="flightNo">HOME 1220</span>
+        <div class="city to"><span class="label">到达</span><span class="code" id="toCode">HOME</span><span class="cname" id="toName">家</span></div>
+      </div>
+      <svg class="arc" viewBox="0 0 600 160" role="img" aria-label="回家航线进度">
+        <path id="route" class="base" d="M 24 130 Q 300 -30 570 130"></path>
+        <path id="trail" class="trail" d="M 24 130 Q 300 -30 570 130"></path>
+        <circle class="dot" cx="24" cy="130" r="6"></circle>
+        <g class="house" transform="translate(570 130)">
+          <path d="M -13 1 L 0 -12 L 13 1 L 10 1 L 10 13 L -10 13 L -10 1 Z"></path>
+          <rect x="-3" y="5" width="6" height="8" rx="1"></rect>
+        </g>
+        <g class="plane" id="plane">
+          <path d="M -13 -2 L 4 -2 L -3 -12 L 1 -12 L 11 -2 L 16 -2 C 19 -2 19 2 16 2 L 11 2 L 1 12 L -3 12 L 4 2 L -13 2 L -16 7 L -18 7 L -16 0 L -18 -7 L -16 -7 Z"></path>
+        </g>
+        <text x="24" y="158" text-anchor="start" id="startLbl">11.10</text>
+        <text x="570" y="158" text-anchor="end" id="endLbl">12.20</text>
+      </svg>
+      <div class="progress-line">
+        <span>已经数了 <b id="passedDays">0</b> 天</span>
+        <span>回家进度 <b id="pct">0%</b></span>
+      </div>
+    </div>
+
+    <div class="tear" aria-hidden="true"></div>
+
+    <div class="pass-bottom">
+      <div class="clock" id="clock">
+        <div class="unit"><div class="tiles" id="t-d"></div><span class="unit-name">天</span></div>
+        <div class="unit"><div class="tiles" id="t-h"></div><span class="unit-name">时</span></div>
+        <div class="unit"><div class="tiles" id="t-m"></div><span class="unit-name">分</span></div>
+        <div class="unit"><div class="tiles" id="t-s"></div><span class="unit-name">秒</span></div>
+      </div>
+      <div class="arrived"><p>今天出发啦</p><span class="hint">一路平安，落地记得给我报个平安。</span></div>
+      <div class="facts">
+        <div class="fact"><span class="label">乘客</span><span class="v" id="passenger">宝宝</span></div>
+        <div class="fact"><span class="label">出发日</span><span class="v" id="landAt">12月3日</span></div>
+        <div class="fact"><span class="label">座位</span><span class="v">靠窗，看云</span></div>
+        <div class="fact"><span class="label">行李</span><span class="v">满满的想念</span></div>
+      </div>
+    </div>
+  </article>
+
+  <section class="block" aria-labelledby="stampsTitle">
+    <div class="block-head">
+      <h2 id="stampsTitle">每天一张邮票</h2>
+      <span class="hint">盖了邮戳的日子，点开能看那天的小纸条</span>
+    </div>
+    <div class="stamps" id="stamps"></div>
+  </section>
+
+  <div class="two">
+    <section class="block" aria-labelledby="noteTitle">
+      <div class="block-head"><h2 id="noteTitle">今天的小纸条</h2><span class="hint">每天一张</span></div>
+      <div class="note-body sealed" id="noteBody">
+        <span class="note-meta" id="noteMeta">第 1 天 · 11月10日</span>
+        <p class="note-text" id="noteText">……</p>
+        <button class="seal" id="sealBtn" type="button">
+          <span class="wax"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg></span>
+          <span class="t">拆开今天的小纸条</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="block hug" aria-labelledby="hugTitle">
+      <div class="block-head"><h2 id="hugTitle">累了就按一下</h2></div>
+      <p>做了一天实验、改了一天论文，累了就按一下。每按一次，就是我抱了你一下。</p>
+      <div class="hug-count" id="hugCount">0<small>次 · 今天</small></div>
+      <button class="hug-btn" id="hugBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg>
+        抱抱你
+      </button>
+    </section>
+  </div>
+
+  <section class="block" aria-labelledby="listTitle">
+    <div class="block-head">
+      <h2 id="listTitle">回家要做的事</h2>
+      <span class="hint" id="listHint">完成 0 / 0</span>
+    </div>
+    <ul class="list" id="list"></ul>
+    <form class="add" id="addForm">
+      <input id="addInput" type="text" maxlength="40" placeholder="还想做什么？写下来" aria-label="新的回家计划">
+      <button class="btn" type="submit">添加</button>
+    </form>
+  </section>
+
+  <details class="settings">
+    <summary>修改日期和名字</summary>
+    <form class="cfg" id="cfgForm">
+      <label class="full">她的称呼<input id="f-name" type="text" maxlength="12"></label>
+      <label class="full">出发时间（北京时间）<input id="f-target" type="datetime-local"></label>
+      <label>出发城市<input id="f-from" type="text" maxlength="10"></label>
+      <label>出发代码<input id="f-fromCode" type="text" maxlength="4"></label>
+      <label>到达城市<input id="f-to" type="text" maxlength="10"></label>
+      <label>到达代码<input id="f-toCode" type="text" maxlength="4"></label>
+      <div class="row-btns">
+        <button class="btn" type="submit">保存</button>
+        <button class="btn ghost" type="button" id="resetBtn">恢复默认</button>
+        <span class="saved" id="savedMsg" hidden>已保存，只在这台设备上生效</span>
+      </div>
+    </form>
+  </details>
+
+  <footer id="nowLine">北京时间 --:--:--</footer>
+</div>
+
+<script>
+(function () {
+  var TZ = 'Asia/Shanghai';
+  var START_DATE = '2026-11-10';
+  var DEFAULTS = { name: '宝宝', target: '2026-12-03T00:00', from: '这里', fromCode: 'HERE', to: '家', toCode: 'HOME' };
+  var LIST_DEFAULT = ['睡到自然醒', '见见好久没见的朋友', '去吃想了很久的那家店', '出去旅游一趟', '多拍几张旅游的风景给我的宝', '吃遍想吃的小吃', '去一个从没去过的地方'];
+  var KEY = 'homecd-cfg', LIST_KEY = 'homecd-list-v4';
+  var DAY = 86400000;
+
+  var NOTES = [
+    '从今天开始数，每过一天，就离家近一点。',
+    '今天有没有好好吃饭？在实验室再忙，也别把午饭拖成下午茶。',
+    '在实验台前低头一整天，记得抬头转转脖子，揉揉肩膀。',
+    '回家第一顿想吃什么？可以先列个清单。',
+    '戴了一天手套，洗了一天手，睡前记得抹护手霜。',
+    '今天也辛苦啦，你已经很棒了。',
+    '一周啦。我陪你一起数。',
+    '盯显微镜盯久了，就看看窗外远一点的地方，让眼睛歇一歇。',
+    '论文写不动的时候就先去睡觉，明天的你会更聪明。',
+    '你一笑，我这边就是晴天。',
+    '回家以后可以睡懒觉了，想想就开心。',
+    '坐着改论文的话，每个小时站起来走两步。',
+    '想家是很正常的事，抱抱你。',
+    '两周了，进度条已经走了一大截。',
+    '今天的小任务：多喝水，早点睡。',
+    '实验再忙，也别忘了给自己倒杯水。',
+    '回去以后好好玩，多拍点照片给我看。',
+    '实验和论文都很重要，但你最重要。',
+    '你在哪里，我的心就跟到哪里。',
+    '今天也是很喜欢你的一天。',
+    '三周啦，剩下的日子比过去的短了。',
+    '别熬夜呀，要元气满满地去玩。',
+    '在实验室站一天腰会酸，晚上泡个脚，早点躺下。',
+    '冬天的家里，一定很暖和。',
+    '每天来看这个页面的你，真可爱。',
+    '今天允许自己偷懒半小时，什么都不做也很好。',
+    '想到你回家开心的样子，我也很开心。',
+    '四周啦，谢谢你每天来数日子。',
+    '天天研究牙齿这么辛苦，也要记得照顾好自己。',
+    '飞机上记得带条小毯子，别着凉。',
+    '行李箱可以慢慢收拾起来了。',
+    '实验不顺也没关系，不是你的问题，是样本今天心情不好。',
+    '再坚持一下下，马上就放假了。',
+    '放假就把论文先放一放，好好休息。',
+    '行李称一下重量，别超重哦。',
+    '快了快了，真的快了。'
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var cfg = Object.assign({}, DEFAULTS);
+  try { var saved = JSON.parse(store(KEY) || 'null'); if (saved && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(saved.target)) cfg = Object.assign(cfg, saved); } catch (e) {}
+
+  var fmtDate = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+  var fmtTime = new Intl.DateTimeFormat('zh-CN', { timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  function bjDate(ms) { return fmtDate.format(new Date(ms)); }
+  function dayStart(str) { return Date.parse(str + 'T00:00:00+08:00'); }
+  function dayIdx(str) { return Math.round((dayStart(str) - dayStart(START_DATE)) / DAY); }
+  function cn(str) { var p = str.split('-'); return (+p[1]) + '月' + (+p[2]) + '日'; }
+  function dot(str) { var p = str.split('-'); return (+p[1]) + '.' + p[2]; }
+
+  var targetMs, targetDate, totalDays, startMs = dayStart(START_DATE);
+
+  function noteFor(i) {
+    var remaining = totalDays - i;
+    if (remaining <= 0) return '今天出发啦！一路平安，落地记得给我报个平安。';
+    if (remaining === 1) return '明天就出发啦。证件、充电器、外套，都带好了吗？';
+    if (remaining === 7) return '最后一周啦！再数七个晚上就回家。';
+    return NOTES[i % NOTES.length];
+  }
+
+  function applyCfg() {
+    targetMs = Date.parse(cfg.target + ':00+08:00');
+    targetDate = cfg.target.slice(0, 10);
+    totalDays = Math.max(1, dayIdx(targetDate));
+    $('herName').textContent = cfg.name || DEFAULTS.name;
+    $('passenger').textContent = cfg.name || DEFAULTS.name;
+    $('fromCode').textContent = (cfg.fromCode || 'HERE').toUpperCase();
+    $('toCode').textContent = (cfg.toCode || 'HOME').toUpperCase();
+    $('fromName').textContent = cfg.from;
+    $('toName').textContent = cfg.to;
+    var p = targetDate.split('-');
+    $('flightNo').textContent = 'HOME ' + p[1] + p[2];
+    var hm = cfg.target.slice(11, 16); $('landAt').textContent = cn(targetDate) + (hm === '00:00' ? '' : ' ' + hm);
+    $('startLbl').textContent = dot(START_DATE);
+    $('endLbl').textContent = dot(targetDate);
+    buildStamps();
+  }
+
+  /* stamps */
+  var selected = null;
+  function todayIdx() { return dayIdx(bjDate(Date.now())); }
+  function dateOf(i) { return bjDate(startMs + i * DAY + 12 * 3600000); }
+
+  function buildStamps() {
+    var box = $('stamps'); box.innerHTML = '';
+    var t = todayIdx();
+    for (var i = 0; i <= totalDays; i++) {
+      var ds = dateOf(i), parts = ds.split('-');
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'stamp'; b.dataset.i = i;
+      b.innerHTML = '<span class="d">' + (+parts[2]) + '</span><span class="m">' + (i === totalDays ? '出发' : (+parts[1]) + '月') + '</span>';
+      if (i === totalDays) b.classList.add('home');
+      b.classList.add(i < t ? 'past' : i === t ? 'today' : 'future');
+      if (i > t) { b.setAttribute('aria-disabled', 'true'); b.setAttribute('aria-label', cn(ds) + '，还没到'); }
+      else b.setAttribute('aria-label', cn(ds) + '的小纸条');
+      if (i === selected) b.classList.add('selected');
+      box.appendChild(b);
+    }
+  }
+
+  $('stamps').addEventListener('click', function (e) {
+    var b = e.target.closest('.stamp'); if (!b) return;
+    var i = +b.dataset.i;
+    if (i > todayIdx()) { if (b.animate) b.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-3px)' }, { transform: 'translateX(3px)' }, { transform: 'translateX(0)' }], { duration: 240 }); return; }
+    showNote(i, true);
+  });
+
+  /* note */
+  function openedKey() { return 'homecd-open-' + bjDate(Date.now()); }
+  function showNote(i, forceOpen) {
+    var t = todayIdx();
+    i = Math.max(0, Math.min(i, totalDays));
+    selected = i;
+    var ds = dateOf(i);
+    $('noteMeta').textContent = '第 ' + (i + 1) + ' 天 · ' + cn(ds);
+    $('noteText').textContent = noteFor(i);
+    $('noteTitle').textContent = i === t ? '今天的小纸条' : cn(ds) + '的小纸条';
+    var body = $('noteBody');
+    var sealed = i === t && !forceOpen && store(openedKey()) !== '1';
+    body.classList.toggle('sealed', sealed);
+    if (!sealed) { body.classList.remove('opening'); void body.offsetWidth; body.classList.add('opening'); }
+    document.querySelectorAll('.stamp').forEach(function (s) { s.classList.toggle('selected', +s.dataset.i === i); });
+  }
+  $('sealBtn').addEventListener('click', function () { store(openedKey(), '1'); showNote(todayIdx(), true); });
+
+  /* hug */
+  var HEART = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg>';
+  function hugKey() { return 'homecd-hug-' + bjDate(Date.now()); }
+  function hugN() { return +(store(hugKey()) || 0); }
+  function renderHug(n) { $('hugCount').innerHTML = n + '<small>次 · 今天</small>'; }
+  $('hugBtn').addEventListener('click', function (e) {
+    var n = hugN() + 1; store(hugKey(), String(n)); renderHug(n);
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var r = e.currentTarget.getBoundingClientRect();
+    for (var k = 0; k < 7; k++) {
+      var h = document.createElement('span'); h.className = 'heart'; h.innerHTML = HEART;
+      h.style.left = (r.left + r.width / 2 - 10 + (Math.random() * 40 - 20)) + 'px';
+      h.style.top = (r.top - 4) + 'px';
+      h.style.setProperty('--dx', (Math.random() * 120 - 60) + 'px');
+      h.style.setProperty('--rot', (Math.random() * 60 - 30) + 'deg');
+      h.style.animationDelay = (k * 60) + 'ms';
+      h.style.width = h.style.height = (14 + Math.random() * 14) + 'px';
+      document.body.appendChild(h);
+      setTimeout(function (el) { el.remove(); }.bind(null, h), 1600);
+    }
+  });
+
+  /* going-home list */
+  var list;
+  try { list = JSON.parse(store(LIST_KEY) || 'null'); } catch (e) { list = null; }
+  if (!Array.isArray(list)) list = LIST_DEFAULT.map(function (t) { return { t: t, d: false }; });
+  function saveList() { store(LIST_KEY, JSON.stringify(list)); }
+  function renderList() {
+    var ul = $('list'); ul.innerHTML = '';
+    list.forEach(function (it, i) {
+      var li = document.createElement('li'); if (it.d) li.className = 'done';
+      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = 'item-' + i; cb.checked = it.d; cb.dataset.i = i;
+      var lb = document.createElement('label'); lb.htmlFor = cb.id; lb.textContent = it.t;
+      var del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.dataset.del = i; del.setAttribute('aria-label', '删除：' + it.t); del.textContent = '×';
+      li.appendChild(cb); li.appendChild(lb); li.appendChild(del); ul.appendChild(li);
+    });
+    var done = list.filter(function (x) { return x.d; }).length;
+    $('listHint').textContent = list.length ? '完成 ' + done + ' / ' + list.length : '还没有计划，写一个吧';
+  }
+  $('list').addEventListener('change', function (e) { if (e.target.dataset.i != null) { list[+e.target.dataset.i].d = e.target.checked; saveList(); renderList(); } });
+  $('list').addEventListener('click', function (e) { var b = e.target.closest('.del'); if (b) { list.splice(+b.dataset.del, 1); saveList(); renderList(); } });
+  $('addForm').addEventListener('submit', function (e) {
+    e.preventDefault(); var v = $('addInput').value.trim(); if (!v) return;
+    list.push({ t: v, d: false }); saveList(); renderList(); $('addInput').value = '';
+  });
+  renderList();
+
+  /* settings */
+  var FIELDS = ['name', 'target', 'from', 'fromCode', 'to', 'toCode'];
+  function fillForm() { FIELDS.forEach(function (k) { $('f-' + k).value = cfg[k]; }); }
+  fillForm();
+  $('cfgForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var next = {}; FIELDS.forEach(function (k) { next[k] = $('f-' + k).value.trim() || DEFAULTS[k]; });
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(next.target) || dayIdx(next.target.slice(0, 10)) < 1) next.target = DEFAULTS.target;
+    cfg = next; store(KEY, JSON.stringify(cfg)); fillForm(); applyCfg(); showNote(todayIdx()); tick(true);
+    var m = $('savedMsg'); m.hidden = false; setTimeout(function () { m.hidden = true; }, 2600);
+  });
+  $('resetBtn').addEventListener('click', function () { cfg = Object.assign({}, DEFAULTS); store(KEY, null); fillForm(); applyCfg(); showNote(todayIdx()); tick(true); });
+
+  /* clock */
+  function setTiles(id, str) {
+    var box = $(id);
+    if (box.children.length !== str.length) { box.innerHTML = ''; for (var i = 0; i < str.length; i++) { var t = document.createElement('div'); t.className = 'tile'; t.innerHTML = '<span></span>'; box.appendChild(t); } }
+    for (var j = 0; j < str.length; j++) {
+      var tile = box.children[j], sp = tile.firstChild;
+      if (sp.textContent !== str[j]) {
+        var changed = sp.textContent !== '';
+        sp.textContent = str[j];
+        if (changed) { tile.classList.remove('flip'); void tile.offsetWidth; tile.classList.add('flip'); }
+      }
+    }
+  }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  var route = $('route'), trail = $('trail'), plane = $('plane'), len = route.getTotalLength();
+  trail.style.strokeDasharray = '0 ' + len;
+  var lastDay = null;
+
+  function tick() {
+    var now = Date.now();
+    var diff = Math.max(0, targetMs - now);
+    var d = Math.floor(diff / DAY), h = Math.floor(diff % DAY / 3600000), m = Math.floor(diff % 3600000 / 60000), s = Math.floor(diff % 60000 / 1000);
+    $('pass').classList.toggle('is-arrived', diff === 0);
+    setTiles('t-d', pad(d)); setTiles('t-h', pad(h)); setTiles('t-m', pad(m)); setTiles('t-s', pad(s));
+    $('daysBig').textContent = Math.max(0, totalDays - todayIdx());
+
+    var p = Math.min(1, Math.max(0, (now - startMs) / (targetMs - startMs)));
+    $('pct').textContent = (p * 100).toFixed(1) + '%';
+    $('passedDays').textContent = Math.max(0, todayIdx());
+    var L = p * len, pt = route.getPointAtLength(L), a = route.getPointAtLength(Math.max(0, L - 1)), b = route.getPointAtLength(Math.min(len, L + 1));
+    var ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+    plane.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ') rotate(' + ang.toFixed(1) + ')');
+    trail.style.strokeDasharray = L.toFixed(1) + ' ' + len;
+
+    $('nowLine').textContent = '北京时间 ' + fmtTime.format(new Date(now));
+    if (diff === 0) $('subLine').textContent = '今天出发啦。一路平安，我在这边等你的消息。';
+
+    var today = bjDate(now);
+    if (today !== lastDay) { lastDay = today; buildStamps(); showNote(todayIdx()); renderHug(hugN()); }
+  }
+
+  applyCfg();
+  tick();
+  setInterval(tick, 1000);
+})();
+</script>
+
+</body>
+</html>
